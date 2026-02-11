@@ -85,11 +85,12 @@ section h3 {
   color: #333;
 }
 
+
 .participants-list {
-  list-style: disc;
+  list-style: none;
   margin: 0;
-  margin-left: 18px;
-  padding: 8px;
+  padding: 0;
+  padding: 6px 8px;
   background-color: #ffffff;
   border: 1px solid #eee;
   border-radius: 4px;
@@ -99,8 +100,27 @@ section h3 {
 }
 
 .participant-item {
-  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 4px;
+  border-bottom: 1px solid #fafafa;
 }
+
+.participant-item:last-child { border-bottom: none; }
+
+.participant-delete {
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.participant-delete:hover { background-color: rgba(198,40,40,0.08); }
 
 /* Small helper for screen-reader-only headings (optional) */
 .sr-only {
