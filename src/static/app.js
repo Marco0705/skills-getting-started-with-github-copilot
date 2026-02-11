@@ -7,11 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
-      const response = await fetch("/activities");
+      const response = await fetch("/activities", { cache: 'no-store' });
       const activities = await response.json();
 
       // Clear loading message
       activitiesList.innerHTML = "";
+      // Reset activity select to avoid duplicate options on repeated fetch
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -20,12 +22,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // Basic card content
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
         `;
+
+        // Participants section (built with DOM methods to avoid HTML injection)
+        const participantsContainer = document.createElement('div');
+        participantsContainer.className = 'participants';
+        participantsContainer.setAttribute('aria-live', 'polite');
+
+        const participantsHeading = document.createElement('h5');
+        participantsHeading.className = 'participants-heading';
+        participantsHeading.textContent = 'Participants';
+        participantsContainer.appendChild(participantsHeading);
+
+        const participants = details.participants || [];
+        if (participants.length > 0) {
+          const ul = document.createElement('ul');
+          ul.className = 'participants-list';
+          participants.forEach(p => {
+            const li = document.createElement('li');
+            li.className = 'participant-item';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = p;
+            li.appendChild(nameSpan);
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'participant-delete';
+            delBtn.setAttribute('aria-label', `Remove ${p}`);
+            delBtn.innerHTML = '✕';
+            // Attach delete handler
+            delBtn.addEventListener('click', async () => {
+              try {
+                const resp = await fetch(
+                  `/activities/${encodeURIComponent(name)}/participants?email=${encodeURIComponent(p)}`,
+                  { method: 'DELETE' }
+                );
+                const payload = await resp.json();
+                if (resp.ok) {
+                  // Refresh activities list
+                  fetchActivities();
+                  messageDiv.textContent = payload.message;
+                  messageDiv.className = 'success';
+                  messageDiv.classList.remove('hidden');
+                  setTimeout(() => messageDiv.classList.add('hidden'), 3000);
+                } else {
+                  messageDiv.textContent = payload.detail || 'Failed to remove participant';
+                  messageDiv.className = 'error';
+                  messageDiv.classList.remove('hidden');
+                  setTimeout(() => messageDiv.classList.add('hidden'), 5000);
+                }
+              } catch (err) {
+                console.error('Error removing participant:', err);
+              }
+            });
+
+            li.appendChild(delBtn);
+            ul.appendChild(li);
+          });
+          participantsContainer.appendChild(ul);
+        } else {
+          const noPart = document.createElement('p');
+          noPart.className = 'no-participants';
+          noPart.textContent = 'No participants yet';
+          participantsContainer.appendChild(noPart);
+        }
+
+        activityCard.appendChild(participantsContainer);
 
         activitiesList.appendChild(activityCard);
 
@@ -62,6 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        // Refresh activities list so participants list and availability update
+        await fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
