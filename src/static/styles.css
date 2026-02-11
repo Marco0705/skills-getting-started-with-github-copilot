@@ -74,6 +74,47 @@ section h3 {
   margin-bottom: 8px;
 }
 
+/* Participants list styling */
+.participants {
+  margin-top: 10px;
+}
+
+.participants-heading {
+  margin: 0 0 6px 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.participants-list {
+  list-style: disc;
+  margin: 0;
+  margin-left: 18px;
+  padding: 8px;
+  background-color: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 0.95rem;
+}
+
+.participant-item {
+  margin-bottom: 6px;
+}
+
+/* Small helper for screen-reader-only headings (optional) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .form-group {
   margin-bottom: 15px;
 }
